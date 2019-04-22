@@ -12,7 +12,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var _contacts = List();
+  List<Contact> _contacts = List();
+  final helper = ContactHelper();
+
+  @override
+  initState() {
+    super.initState();
+    helper.getAllContacts().then(_updateContactList);
+  }
+
+  _updateContactList(contacts) {
+    setState(() {
+      _contacts = contacts;
+      print(_contacts);
+    });
+  }
 
   void _goToContactPage({Contact contact}) {
     if (contact != null)
@@ -23,6 +37,14 @@ class _HomePageState extends State<HomePage> {
           context, MaterialPageRoute(builder: (context) => ContactPage()));
   }
 
+  Future<void> _refreshContactList() async {
+    List<Contact> contacts = await helper.getAllContacts();
+    setState(() {
+      _contacts = contacts;
+    });
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,8 +52,36 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
         centerTitle: true,
       ),
-      body: ListView.builder(
-          itemCount: _contacts.length, itemBuilder: (context, index) {}),
+      body: RefreshIndicator(
+        onRefresh: _refreshContactList,
+        child: ListView.builder(
+            itemCount: _contacts.length,
+            itemBuilder: (context, index) {
+              Contact contact = _contacts[index];
+              return GestureDetector(
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                        width: 100.0,
+                        child: Image.asset('images/profile-placeholder.png')),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          contact.name ?? '',
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(contact.email ?? ''),
+                        Text(contact.phone ?? ''),
+                      ],
+                    )
+                  ],
+                ),
+              );
+            }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _goToContactPage,
         tooltip: 'Novo Contato',
