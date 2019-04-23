@@ -29,15 +29,19 @@ class _ContactPageState extends State<ContactPage> {
   void initState() {
     super.initState();
     if (widget.contact != null) {
-      title = _editedContact.name;
       setState(() {
         _editedContact = widget.contact;
+        title = _editedContact.name;
+        _nomeController.text = _editedContact.name;
+        _emailController.text = _editedContact.email;
+        _phoneController.text = _editedContact.phone;
       });
     }
   }
 
   bool _isValid() {
-    return true;
+    return _nomeController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty && _phoneController.text.isNotEmpty;
   }
 
   _saveContact() async {
